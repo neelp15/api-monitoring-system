@@ -1,249 +1,135 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#101827">
-    <meta name="description" content="API monitoring, response times and incident management dashboard.">
-    <title>API Monitor | Dashboard</title>
+    <meta name="theme-color" content="#111114">
+    <meta name="description" content="API monitoring, response-time history, and incident management dashboard.">
+    <title>API Monitor — Control Center</title>
     <link rel="stylesheet" href="/static/dashboard.css">
 </head>
 <body>
-    <aside class="sidebar">
-        <a class="brand" href="#overview" aria-label="API Monitor home">
-            <span class="brand-icon">A</span>
-            <span class="brand-copy">
-                API Monitor
-                <small>MONITORING CENTER</small>
-            </span>
-        </a>
-
-        <div class="nav-caption">WORKSPACE</div>
-        <nav class="sidebar-nav" aria-label="Main navigation">
-            <a class="nav-link active" href="#overview">
-                <span class="nav-icon">▦</span> Overview
+    <div class="app-shell">
+        <aside class="sidebar">
+            <a class="brand" href="#overview" aria-label="API Monitor home">
+                <span class="brand-mark"><span></span><span></span><span></span></span>
+                <span class="brand-copy">API Monitor<small>CONTROL CENTER</small></span>
             </a>
-            <a class="nav-link" href="#monitors">
-                <span class="nav-icon">◉</span> Monitors
-            </a>
-            <a class="nav-link" href="#performance">
-                <span class="nav-icon">⌁</span> Performance
-            </a>
-            <a class="nav-link" href="#incidents">
-                <span class="nav-icon">△</span> Incidents
-                <span id="sidebar-incident-count" class="nav-count">0</span>
-            </a>
-        </nav>
 
-        <div class="sidebar-bottom">
-            <span class="live-indicator"></span>
-            <div>
-                <strong>Monitoring service</strong>
-                <small>Dashboard connected</small>
+            <div class="sidebar-label">WORKSPACE</div>
+            <nav class="nav-list" aria-label="Main navigation">
+                <a class="nav-link active" href="#overview"><span class="nav-icon">◫</span><span>Overview</span></a>
+                <a class="nav-link" href="#monitors"><span class="nav-icon">◎</span><span>Monitors</span></a>
+                <a class="nav-link" href="#performance"><span class="nav-icon">⌁</span><span>Performance</span></a>
+                <a class="nav-link" href="#incidents"><span class="nav-icon">⚑</span><span>Incidents</span><span id="sidebar-incident-count" class="nav-count">0</span></a>
+            </nav>
+
+            <div class="sidebar-spacer"></div>
+            <div class="sidebar-system">
+                <span class="system-indicator"></span>
+                <div><strong>Monitoring service</strong><small>Dashboard connected</small></div>
             </div>
-        </div>
-    </aside>
+            <div class="sidebar-foot">API MONITORING SYSTEM <span>•</span> v1</div>
+        </aside>
 
-    <main class="main-content">
-        <header class="topbar">
-            <div class="page-heading">
-                <p class="eyebrow">MONITORING CENTER / OVERVIEW</p>
-                <h1>Good to see you.</h1>
-                <p class="subtitle">Monitor service health, investigate failures, and track API performance.</p>
-            </div>
+        <main class="main-content">
+            <header class="topbar">
+                <div class="mobile-brand">API Monitor <span> / Control Center</span></div>
+                <div class="breadcrumb"><span>Workspace</span><span class="crumb-slash">/</span><strong>Overview</strong></div>
+                <div class="topbar-actions">
+                    <span class="live-label"><span class="live-dot"></span> LIVE DATA</span>
+                    <button id="refresh-button" class="button button-primary" type="button"><span class="refresh-symbol">↻</span> Refresh data</button>
+                </div>
+            </header>
 
-            <div class="topbar-actions">
-                <span class="connection-label">
-                    <span class="live-indicator"></span>
-                    Live dashboard
-                </span>
-                <button id="refresh-button" class="button button-primary" type="button">
-                    <span aria-hidden="true">↻</span>
-                    Refresh data
-                </button>
-            </div>
-        </header>
-
-        <div id="message" class="message" role="status" aria-live="polite"></div>
-
-        <section id="overview" class="dashboard-section">
-            <div class="section-heading">
+            <div class="page-intro">
                 <div>
-                    <h2>System overview</h2>
-                    <p>A snapshot of your monitored endpoints.</p>
+                    <p class="eyebrow">MONITORING / OVERVIEW</p>
+                    <h1>Your systems, <span>at a glance.</span></h1>
+                    <p class="page-subtitle">A clear view of endpoint health, latency, and incidents.</p>
                 </div>
-                <span id="last-updated" class="muted">Loading data...</span>
+                <div class="updated-card"><span class="updated-icon">◷</span><div><small>LAST UPDATED</small><strong id="last-updated">Waiting for data…</strong></div></div>
             </div>
 
-            <div class="stats-grid">
-                <article class="stat-card">
-                    <div class="stat-top">
-                        <span class="stat-label">Total monitors</span>
-                        <span class="stat-icon icon-blue">◉</span>
-                    </div>
-                    <strong id="total-monitors" class="stat-value">—</strong>
-                    <span class="stat-note">Configured endpoints</span>
-                </article>
+            <div id="message" class="message" role="status" aria-live="polite"></div>
 
-                <article class="stat-card">
-                    <div class="stat-top">
-                        <span class="stat-label">Currently up</span>
-                        <span class="stat-icon icon-green">✓</span>
-                    </div>
-                    <strong id="up-monitors" class="stat-value green">—</strong>
-                    <span class="stat-note">Latest check successful</span>
-                </article>
-
-                <article class="stat-card">
-                    <div class="stat-top">
-                        <span class="stat-label">Currently down</span>
-                        <span class="stat-icon icon-red">!</span>
-                    </div>
-                    <strong id="down-monitors" class="stat-value red">—</strong>
-                    <span class="stat-note">Latest check unsuccessful</span>
-                </article>
-
-                <article class="stat-card">
-                    <div class="stat-top">
-                        <span class="stat-label">Open incidents</span>
-                        <span class="stat-icon icon-orange">△</span>
-                    </div>
-                    <strong id="open-incidents" class="stat-value orange">—</strong>
-                    <span class="stat-note">Require attention</span>
-                </article>
-            </div>
-        </section>
-
-        <section id="performance" class="panel performance-panel">
-            <div class="section-heading performance-heading">
-                <div>
-                    <h2>Response time</h2>
-                    <p>Historical latency for a selected monitor.</p>
+            <section id="overview" class="overview-section">
+                <div class="section-title-row"><div><p class="eyebrow">AT A GLANCE</p><h2>System overview</h2></div><span class="section-caption">Live from your monitoring database</span></div>
+                <div class="stats-grid">
+                    <article class="stat-card stat-total">
+                        <div class="stat-top"><span class="stat-label">Total monitors</span><span class="stat-icon">◫</span></div>
+                        <strong id="total-monitors" class="stat-value">—</strong>
+                        <div class="stat-bottom"><span class="stat-footnote">Configured endpoints</span><span class="stat-accent-line"></span></div>
+                    </article>
+                    <article class="stat-card stat-up">
+                        <div class="stat-top"><span class="stat-label">Currently up</span><span class="stat-icon">↗</span></div>
+                        <strong id="up-monitors" class="stat-value">—</strong>
+                        <div class="stat-bottom"><span class="stat-footnote">Latest check successful</span><span class="mini-status"><i></i> UP</span></div>
+                    </article>
+                    <article class="stat-card stat-down">
+                        <div class="stat-top"><span class="stat-label">Currently down</span><span class="stat-icon">⌁</span></div>
+                        <strong id="down-monitors" class="stat-value">—</strong>
+                        <div class="stat-bottom"><span class="stat-footnote">Down or timed out</span><span class="mini-status down"><i></i> ALERT</span></div>
+                    </article>
+                    <article class="stat-card stat-incidents">
+                        <div class="stat-top"><span class="stat-label">Open incidents</span><span class="stat-icon">⚑</span></div>
+                        <strong id="open-incidents" class="stat-value">—</strong>
+                        <div class="stat-bottom"><span class="stat-footnote">Require attention</span><span class="mini-status incident"><i></i> OPEN</span></div>
+                    </article>
                 </div>
-                <label class="select-label" for="chart-monitor-select">
-                    Monitor
-                    <select id="chart-monitor-select">
-                        <option value="">Select a monitor</option>
-                    </select>
-                </label>
-            </div>
+            </section>
 
-            <div class="chart-summary">
-                <div>
-                    <span class="stat-label">Latest recorded response</span>
-                    <strong id="chart-latest-value">—</strong>
+            <section id="performance" class="panel performance-panel">
+                <div class="panel-heading">
+                    <div><p class="eyebrow">LATENCY INSIGHTS</p><h2>Response-time history</h2><p class="panel-description">Recorded response times for a selected monitor.</p></div>
+                    <div class="chart-controls"><label for="chart-monitor-select">MONITOR</label><select id="chart-monitor-select"><option value="">Select a monitor</option></select></div>
                 </div>
-                <div>
-                    <span class="stat-label">Average response</span>
-                    <strong id="chart-average-value">—</strong>
+                <div class="chart-summary">
+                    <div class="chart-metric"><span>Latest response</span><strong id="chart-latest-value">—</strong></div>
+                    <div class="chart-metric"><span>Average response</span><strong id="chart-average-value">—</strong></div>
+                    <div class="chart-metric chart-count"><span>History window</span><strong id="chart-check-count">No data</strong></div>
                 </div>
-                <span id="chart-check-count" class="chart-count">Waiting for data</span>
-            </div>
-
-            <div class="chart-wrap">
-                <canvas
-                    id="response-chart"
-                    role="img"
-                    aria-label="Response time history chart">
-                    Response time history chart.
-                </canvas>
-                <div id="chart-empty" class="chart-empty">
-                    Select a monitor to view its response-time history.
+                <div class="chart-container">
+                    <canvas id="response-chart" aria-label="Response-time history chart" role="img"></canvas>
+                    <div id="chart-empty" class="chart-empty">Select a monitor to view response-time history.</div>
                 </div>
-            </div>
-            <p class="chart-footnote">Chart uses recorded check results. Failed checks without a response time are not plotted.</p>
-        </section>
+                <p class="chart-footnote"><span class="legend-dot"></span> Response time · milliseconds <span class="chart-footnote-right">Most recent 50 checks, when available</span></p>
+            </section>
 
-        <section id="monitors" class="panel">
-            <div class="section-heading">
-                <div>
-                    <h2>API monitors</h2>
-                    <p>Inspect endpoint status and run a manual check.</p>
+            <section id="monitors" class="panel">
+                <div class="panel-heading monitor-heading">
+                    <div><p class="eyebrow">ENDPOINT MANAGEMENT</p><h2>API monitors</h2><p class="panel-description">Inspect the latest status for each configured endpoint.</p></div>
+                    <span id="monitor-count" class="count-pill">0 monitors</span>
                 </div>
-                <span id="monitor-count" class="pill">0 monitors</span>
-            </div>
-
-            <div class="toolbar">
-                <label class="search-box">
-                    <span aria-hidden="true">⌕</span>
-                    <input id="monitor-search" type="search" placeholder="Search monitors or URLs..." autocomplete="off">
-                </label>
-
-                <label class="filter-label" for="monitor-status-filter">
-                    Status
-                    <select id="monitor-status-filter">
-                        <option value="all">All statuses</option>
-                        <option value="up">Up</option>
-                        <option value="down">Down</option>
-                        <option value="timeout">Timeout</option>
-                        <option value="unknown">Not checked</option>
-                        <option value="inactive">Inactive</option>
-                    </select>
-                </label>
-            </div>
-
-            <div class="table-wrapper">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Monitor</th>
-                            <th>Endpoint URL</th>
-                            <th>Status</th>
-                            <th>Response time</th>
-                            <th>Last checked</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody id="monitors-table">
-                        <tr><td colspan="6" class="empty">Loading monitors...</td></tr>
-                    </tbody>
-                </table>
-            </div>
-            <div id="monitor-table-footer" class="table-footer"></div>
-        </section>
-
-        <section id="incidents" class="panel">
-            <div class="section-heading">
-                <div>
-                    <h2>Incident activity</h2>
-                    <p>Review outages and recovery history.</p>
+                <div class="table-toolbar">
+                    <label class="search-box"><span>⌕</span><input id="monitor-search" type="search" placeholder="Search monitors or URLs…" autocomplete="off"></label>
+                    <label class="filter-control"><span>STATUS</span><select id="monitor-status-filter"><option value="all">All statuses</option><option value="up">Up</option><option value="down">Down</option><option value="timeout">Timeout</option><option value="unknown">Unknown</option><option value="inactive">Inactive</option></select></label>
                 </div>
-                <label class="filter-label" for="incident-filter">
-                    Status
-                    <select id="incident-filter">
-                        <option value="all">All incidents</option>
-                        <option value="open">Open only</option>
-                        <option value="resolved">Resolved only</option>
-                    </select>
-                </label>
-            </div>
+                <div class="table-wrapper">
+                    <table>
+                        <thead><tr><th>MONITOR / ENDPOINT</th><th>STATUS</th><th>RESPONSE TIME</th><th>LAST CHECKED</th><th class="action-column">ACTION</th></tr></thead>
+                        <tbody id="monitors-table"><tr><td colspan="5" class="empty">Loading monitors…</td></tr></tbody>
+                    </table>
+                </div>
+                <div class="table-footer"><span id="monitor-table-footer">Loading monitor list…</span><span>Use “Check now” to run a manual check.</span></div>
+            </section>
 
-            <div class="table-wrapper">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Incident</th>
-                            <th>Monitor</th>
-                            <th>Status</th>
-                            <th>Description</th>
-                            <th>Started at</th>
-                            <th>Resolved at</th>
-                        </tr>
-                    </thead>
-                    <tbody id="incidents-table">
-                        <tr><td colspan="6" class="empty">Loading incidents...</td></tr>
-                    </tbody>
-                </table>
-            </div>
-        </section>
+            <section id="incidents" class="panel">
+                <div class="panel-heading incident-heading">
+                    <div><p class="eyebrow">EVENT TIMELINE</p><h2>Incident center</h2><p class="panel-description">Review failures and recovery history from your backend.</p></div>
+                    <label class="filter-control"><span>SHOW</span><select id="incident-filter" aria-label="Filter incidents"><option value="all">All incidents</option><option value="open">Open only</option><option value="resolved">Resolved only</option></select></label>
+                </div>
+                <div class="table-wrapper">
+                    <table>
+                        <thead><tr><th>INCIDENT</th><th>MONITOR</th><th>STATUS</th><th>DESCRIPTION</th><th>STARTED</th><th>RESOLVED</th></tr></thead>
+                        <tbody id="incidents-table"><tr><td colspan="6" class="empty">Loading incidents…</td></tr></tbody>
+                    </table>
+                </div>
+            </section>
 
-        <footer>
-            <span>API Monitoring &amp; Incident Alert System</span>
-            <span>Powered by FastAPI · PostgreSQL</span>
-        </footer>
-    </main>
-
-    <script src="/static/dashboard.js" defer></script>
+            <footer class="page-footer"><span>API Monitoring and Incident Alert System</span><span><i class="footer-dot"></i> Powered by your FastAPI backend</span></footer>
+        </main>
+    </div>
+    <script src="/static/dashboard.js"></script>
 </body>
 </html>
