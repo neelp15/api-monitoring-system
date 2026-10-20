@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 
 from pathlib import Path
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 
 from app.core.config import settings
@@ -23,6 +23,9 @@ app.mount(
     name="static",
 )
 
+@app.get("/", include_in_schema=False)
+def home():
+    return RedirectResponse(url="/dashboard")
 
 @app.get("/dashboard", include_in_schema=False)
 def dashboard():
